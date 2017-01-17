@@ -39,7 +39,7 @@ public class Board extends JPanel implements ActionListener {
      * {@inheritDoc}
      * 
      * @see java.awt.event.KeyAdapter#keyPressed(java.awt.event.KeyEvent)
-     */
+     * /
     @Override
     public void keyPressed(final KeyEvent e) {
 
@@ -85,6 +85,7 @@ public class Board extends JPanel implements ActionListener {
       }
     }
   }
+*/
   /**
    * Serial UID
    */
