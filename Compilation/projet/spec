@@ -1,0 +1,7 @@
+grammaire utilisée
+
+S -> A | eps
+A -> { B } S
+B -> C B | S
+C -> a | b | c
+

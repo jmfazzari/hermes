@@ -1,0 +1,140 @@
+// Specification jCup
+import java_cup.runtime.*;
+import java.io.InputStreamReader;
+import java.util.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException; 
+
+parser code {:
+    public static void main(String args[]) throws Exception {
+        new parser(new Yylex(new InputStreamReader(System.in))).parse();
+    }	
+:}
+
+action code {:
+    public String Tlivre[];
+    int nbLivre=0;
+    int cpt;
+    String tete;
+    String corps="";
+    String pied;
+    public void ecritLigne(){
+
+        tete = "<!DOCTYPE html>\n";
+        tete = tete + "<html>\n";
+        tete = tete + "\t<head>\n";
+        tete = tete + "\t\t<title>Ma bibliothèque</title>\n";
+        tete = tete + "\t</head>\n";
+        tete = tete + "\t<body>\n";
+        tete = tete + "\t\t<p>J'ai une chouette bibliothèque !</p>\n";
+        tete = tete + "\t\t<table border=1 cellspacing=1 cellpadding=5>\n\t\t\t<tr>\n";
+        tete = tete + "\t\t\t\t<td><b>Titre</b></td>\n";
+        tete = tete + "\t\t\t\t<td><b>Auteur</b></td>\n";
+        tete = tete + "\t\t\t\t<td><b>Type</b></td>\n";
+        tete = tete + "\t\t\t\t<td><b>Critique</b></td>\n\t\t\t</tr>\n";
+
+        pied = "\t\t</table>\n";
+        pied = pied + "\t\t<p>Ma bibliothèque contient "+nbLivre+" livres, je suis bien content !</p>\n";
+        pied = pied + "\t</body>\n";
+        pied = pied + "</html>\n";
+
+        try{
+          File f = new File("projet.htm");//0
+          FileWriter fw = new FileWriter(f, true);
+          fw.write(tete+corps+pied);
+          fw.close();
+        }catch(IOException e){
+        }
+        
+    }
+    
+:}
+
+
+terminal ACOLOUV, ACOLFERM, TITRE, AUTEURS, TYPE, CRITIQUE, CHAINE;
+non terminal axiomeprime, axiome, livre, champs, champ;
+
+axiomeprime ::= axiome {: ecritLigne(); :};
+axiome  ::= livre axiome |;
+livre  ::= {: Tlivre=new String[4];:}
+
+            ACOLOUV {:  cpt = 0; :} 
+            champs {:   
+					
+			:}
+            
+            ACOLFERM  {:
+            	nbLivre++;
+            	//erreurs sur les champs
+            	switch (cpt) {
+					case 1 :
+						System.out.println("vous n'avez pas entrée l'auteur, le type, la critique sur l'entrée n°"+nbLivre);
+						break;
+					case 2 :
+						System.out.println("vous n'avez pas entrée le titre, le type, la critique sur l'entrée n°"+nbLivre);
+						break;
+					case 3 :
+						System.out.println("vous n'avez pas entrée le type, la critique sur l'entrée n°"+nbLivre);
+						break;
+					case 4 :
+						System.out.println("vous n'avez pas entrée le titre, l'auteur, la critique sur l'entrée n°"+nbLivre);
+						break;
+					case 5 :
+						System.out.println("vous n'avez pas entrée l'auteur, la critique sur l'entrée n°"+nbLivre);
+						break;
+					case 6 :
+						System.out.println("vous n'avez pas entrée le titre, le type sur l'entrée n°"+nbLivre);
+						break;
+					case 7 :
+						System.out.println("vous n'avez pas entrée la critique sur l'entrée n°"+nbLivre);
+						break;
+					case 8 :
+						System.out.println("vous n'avez pas entrée le titre, l'auteur, le type sur l'entrée n°"+nbLivre);
+						break;
+					case 9 :
+						System.out.println("vous n'avez pas entrée l'auteur, le type sur l'entrée n°"+nbLivre);
+						break;
+					case 10 :
+						System.out.println("vous n'avez pas entrée le titre, le type sur l'entrée n°"+nbLivre);
+						break;
+					case 11 :
+						System.out.println("vous n'avez pas entrée le type sur l'entrée n°"+nbLivre);
+						break;	
+					case 12 :
+						System.out.println("vous n'avez pas entrée le titre, l'auteur sur l'entrée n°"+nbLivre);
+						break;				
+					case 13 :
+						System.out.println("vous n'avez pas entrée l'auteur sur l'entrée n°"+nbLivre);
+						break;
+					case 14 :
+						System.out.println("vous n'avez pas entrée le titre sur l'entrée n°"+nbLivre);
+						break;
+					case 15 :
+						break;
+					default:
+						System.out.println("vous avez trop d'entrées sur l'entrée n°"+nbLivre);
+						break; 
+				}
+            
+            
+                // édition du livre
+                corps = corps + "\t\t\t<tr>\n";
+                for(int j=0;j<4;j++){
+                    corps = corps + "\t\t\t\t<td>"+Tlivre[j]+"</td>\n";
+                }
+                corps = corps + "\t\t\t</tr>\n";
+            :}
+            
+            ;
+            
+champs   ::=  champ  champs | ;
+         
+champ  ::= TITRE CHAINE:a {: Tlivre[0]=(String)a ;cpt += 1; :}
+          | AUTEURS CHAINE:a {:Tlivre[1]=(String)a ;cpt += 2; :}
+          | TYPE CHAINE:a {: Tlivre[2]=(String)a ;cpt += 4; :}
+          | CRITIQUE CHAINE:a {: Tlivre[3]=(String)a ;cpt += 8; :};
+
+
+

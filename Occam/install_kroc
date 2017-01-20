@@ -1,0 +1,33 @@
+#!/bin/bash
+sudo -s aptitude install bash gcc binutils gawk make automake autoconf pkg-config \
+  libc6-dev libsdl1.2-dev libsdl-sound1.2-dev libgl1-mesa-dev \
+  libmysqlclient15-dev libpng12-dev libxmu-dev libxi-dev \
+  libplayercore2-dev libplayerc2-dev libltdl3-dev \
+  perl python xsltproc git
+  
+sudo -s export CC="gcc -Xlinker --no-as-needed"
+  
+sudo -s aptitude install libc6-dev-i386 lib32gcc1 gcc-multilib
+  
+sudo -s apt-get install libgl1-mesa-dev:i386
+sudo -s apt-get install libglu1-mesa-dev:i386
+sudo -s apt-get install libsm-dev:i386
+sudo -s apt-get install libxmu-dev:i386
+sudo -s apt-get install libxi-dev:i386
+sudo -s apt-get update
+
+sudo -s git clone --depth 1 -b kroc-1.6 git://github.com/concurrency/kroc.git kroc-git
+cd kroc-git
+
+sudo -s ./build --prefix=/usr/local/kroc
+
+sudo -s ./configure --prefix=...
+sudo -s make
+sudo -s make install
+
+sudo -s autoreconf -vfi
+
+sudo -s ./usr/local/kroc/bin/kroc-setup.sh
+
+echo "installation términée.
+echo "Il faut maintenant ajouter 'source /usr/local/kroc/bin/kroc-setup.sh' dans le .bashrc"

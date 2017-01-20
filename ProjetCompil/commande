@@ -1,0 +1,39 @@
+#!/bin/bash
+cd $1
+rm parser.class
+rm parser.java
+rm sym.class
+rm sym.java
+rm projet.htm
+rm Yylex.class
+rm Yylex.java
+rm CUP\$parser\$actions.class
+rm /home/jean-michel/ProjetCompil/projet/test/code_ex1/*
+clear
+echo "--------------------------------------------"
+echo "Cette génération concerne les fichiers [$1]"
+echo "--------------------------------------------"
+echo "____________________________________________"
+echo "---------- DEBUT Génération JFlex ----------"
+echo "--------------------------------------------"
+java jflex.Main $1.lex --verbose
+echo "--------------------------------------------"
+echo "----------- FIN Génération JFlex -----------"
+echo "____________________________________________"
+echo "----------- DEBUT Génération CUP -----------"
+echo "--------------------------------------------"
+java java_cup.Main $1.cup
+echo "--------------------------------------------"
+echo "------------ FIN Génération CUP ------------"
+echo "____________________________________________"
+echo "------------ DEBUT Compilation -------------"
+echo "--------------------------------------------"
+javac parser.java sym.java Yylex.java -Xdiags:verbose -Xlint:unchecked
+echo "--------------------------------------------"
+echo "------------- FIN Compilation --------------"
+echo "____________________________________________"
+echo "----------- Lancemant du parser ------------"
+echo "--------------------------------------------"
+java parser <ex3.txt> log1.txt
+cd test
+

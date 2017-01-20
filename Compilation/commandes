@@ -1,0 +1,19 @@
+Génération JFlex :
+java jflex.Main fichier.lex
+
+Génération JCup:
+java java_cup.Main fichier.cup
+
+Compilation du parser et du lexer :
+javac parser.java sym.java Yylex.java
+
+Test :
+java parser < [fichier de données]
+
+
+pour utiliser le bash :
+Attention, les fichiers doivent être nommées identiquement hor extention
+ex : [fichier].lex [fichier].cup [fichier] (pour le fichier de donnée) 
+
+bash commande [fichier]
+

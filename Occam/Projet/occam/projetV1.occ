@@ -1,0 +1,306 @@
+--prise en compte : pas de cour-circuit
+#USE "course.lib"
+
+VAL INT maxVois IS 4:
+VAL INT null IS -1:
+
+--definition d'un paquet de donnees
+DATA TYPE PAQUET
+  RECORD
+    INT source:   --identifiant de la machine source et de la nature (si = null : paquet null)
+    INT dest:   --identifiant de la machine destination
+    INT num: --numero du paquet
+:    
+--constantes pour l'identification des types d'evenement
+VAL INT Creation IS 0:
+VAL INT Envoi IS 1:
+VAL INT Recept IS 2:
+VAL INT Arrive IS 3:
+
+--constantes pour l'identification des composants
+VAL INT TERMINAL IS 0:
+VAL INT ROUTEUR IS 1:
+
+DATA TYPE CREATION
+  RECORD
+    INT dest:   --identifiant de la machine destination
+    INT time:  --cycle pour l'envoi
+:  
+
+--definition de l'affichage d'un paquet par un composant
+DATA TYPE AFFPAQUET
+  RECORD
+    INT comp:   --nature du composant
+    INT id: --identifiant du composant
+    INT evt:   --type d'evenement 
+    INT time:    --cycle courant du composant
+    INT port:     --numero de port
+    PAQUET paquet:  --paquet a afficher
+:
+
+--definition de la procedure pour le multiplexage de l'impression
+PROC muxAff([] CHAN OF  AFFPAQUET paquetScreens, CHAN OF BYTE screen)
+  AFFPAQUET affpaq:
+  SEQ
+    WHILE TRUE
+      ALT i=0 FOR SIZE paquetScreens
+        paquetScreens[i] ? affpaq
+          SEQ
+            out.string (" --------------------------------*n", 0, screen)
+            out.string ("| Message du ", 0, screen)
+            CASE affpaq[comp]
+              TERMINAL
+                out.string ("Terminal ",0, screen)    
+              ROUTEUR
+                out.string ("Routeur  ",0, screen) 
+              ELSE
+                SKIP
+            out.number (affpaq[id], 2, screen)
+            out.string ("        |*n", 0, screen)
+            out.string (" --------------------------------*n", 0, screen)
+            CASE affpaq[evt]--procedure définissant un routeur
+              Creation
+                out.string ("|  creation de paquet           |*n",0, screen)    
+              Envoi
+                out.string ("|    envoi de paquet            |*n",0, screen) 
+              Recept
+                out.string ("| reception de paquet           |*n",0, screen)      
+              Arrive
+                out.string ("| paquet a destination          |*n",0, screen)
+              ELSE
+                SKIP
+            out.string ("|  cycle  |   port              |*n",0, screen)
+            out.string ("|   ", 0, screen)
+            out.number (affpaq[time], 2, screen)  
+            out.string ("    |  ", 0, screen)
+            out.number (affpaq[port], 2, screen)  
+            out.string ("                |*n", 0, screen)
+            out.string ("|   source   |   dest  |  num   |*n",0, screen)
+            out.string ("|  ", 0, screen)
+            out.number (affpaq[paquet][source], 2, screen)  
+            out.string ("        |  ", 0, screen)
+            out.number (affpaq[paquet][dest], 2, screen)  
+            out.string ("     |", 0, screen)
+            out.number (affpaq[paquet][num], 2, screen)  
+            out.string ("      |*n", 0, screen)
+            out.string (" --------------------------------*n", 0, screen)       
+:    
+
+--procedure definissant un terminal
+
+PROC terminal (VAL INT id, CHAN OF PAQUET in, CHAN OF PAQUET out, CHAN OF AFFPAQUET paqScreen, VAL [] CREATION creation)
+  PAQUET paqIn, paqOut:
+  INT cptTour, numPaq:
+  AFFPAQUET affPaq:
+  
+  SEQ
+  
+    --initialisation des informations d'affichage de paquet qui ne changeront pas
+    affPaq[comp] := TERMINAL
+    affPaq[id] := id
+    affPaq[port] := 0 --car un seul port
+	  
+    cptTour := 0
+    numPaq := 0
+	  
+	  --initialisation paquets
+    paqOut[source] := null
+		  
+    WHILE TRUE
+      SEQ
+        --communications
+        PAR 
+          in ? paqIn
+          out ! paqOut
+               
+        --trace des envois et des receptions de paquets (si non null)
+        IF
+          NOT (paqOut[source] = null)
+            SEQ
+              affPaq[evt] := Envoi
+              affPaq[time] := cptTour
+              affPaq[paquet] := paqOut
+              paqScreen ! affPaq
+          TRUE 
+            SKIP
+			  
+        IF
+          NOT (paqIn[source] = null)
+            SEQ
+              affPaq[evt] := Recept
+              affPaq[time] := cptTour
+              affPaq[paquet] := paqIn
+              paqScreen ! affPaq
+          TRUE
+            SKIP
+				
+        --remise à null du paquet envoye
+        paqOut[source] := null
+            
+        --traitement du paquets reçus    
+        IF
+          NOT (paqIn[source] = null)
+            IF
+              paqIn[dest] = id
+                SEQ
+                  affPaq[evt] := Arrive
+                  affPaq[time] := cptTour
+                  affPaq[paquet] := paqIn
+                  paqScreen ! affPaq
+              TRUE
+                SKIP
+          TRUE
+            SKIP
+			  
+        --traitement de la création de paquets
+        SEQ i = 0 FOR SIZE creation
+          IF
+            creation[i][time] = (cptTour + 1)
+              SEQ
+
+                --creation paquet 
+                paqOut[source] := id
+                paqOut[dest] := creation[i][dest]
+                paqOut[num] := numPaq
+                numPaq := numPaq+1
+                affPaq[evt] := Creation
+                affPaq[time] := cptTour
+                affPaq[paquet] := paqOut
+                paqScreen ! affPaq
+            TRUE
+              SKIP
+			
+        cptTour := cptTour + 1
+: 
+
+
+  
+--procedure définissant un routeur 
+PROC routeur (VAL INT id, [] CHAN OF PAQUET in, [] CHAN OF PAQUET out, CHAN OF AFFPAQUET paqScreen)
+  [maxVois] PAQUET paqIn:
+  PAQUET  paqOut:
+  INT cptTour, numPaq,port:
+  AFFPAQUET affPaq:
+  
+  
+  SEQ
+  
+    --initialisation des informations d'affichage de paquet qui ne changeront pas
+    affPaq[comp] := ROUTEUR
+    affPaq[id] := id
+    cptTour := 0
+    numPaq := 0
+	  --initialisation paquets
+    paqOut[source] := null
+    paqOut[dest] := null
+    port:=0
+    
+		  
+    WHILE TRUE
+      SEQ
+        --communications
+        PAR
+          PAR i=0 FOR SIZE in
+            in[i] ? paqIn[i]
+          PAR i=0 FOR SIZE out
+            out[i] ! paqOut
+        --trace des envois et des receptions de paquets (si non null)
+        -- si paquet non null reçu à envoyer 
+        IF
+          NOT (paqOut[source] = null)
+            SEQ
+              affPaq[evt] := Envoi
+              affPaq[time] := cptTour
+              affPaq[paquet] := paqOut
+              affPaq[port]:=port
+              paqScreen ! affPaq
+              --remise à null du paquet envoye
+              paqOut[source] := null
+          TRUE 
+            SKIP   
+        SEQ i = 0 FOR SIZE in
+          SEQ
+            -- si paquet non null reçu   
+            IF
+              NOT (paqIn[i][source] = null)
+                SEQ
+                  port:=i
+                  paqOut := paqIn[i]
+                  affPaq[evt] := Recept
+                  affPaq[time] := cptTour
+                  affPaq[paquet] := paqIn[i]
+                  affPaq[port]:=i
+                  paqScreen ! affPaq
+                  --chagement d etat de paqOut
+                  paqOut:=paqIn[i]
+                  
+              TRUE
+                SKIP
+        
+        
+       
+        --fin d'un tour de boucle
+        cptTour := cptTour + 1  
+
+
+: 
+
+PROC reseau(CHAN OF BYTE keyboard,screen,error)
+  [10]CHAN OF AFFPAQUET paqScreen:
+  [24]CHAN OF PAQUET lien:
+  [3][2] CREATION creation: --2 creation de paquet pour chaque terminal
+
+  --exemple : terminal 1 connecte au routeur 0
+
+  r0In  IS [lien[6]]:
+  r0Out IS [lien[7]]:
+  
+  r1In  IS [lien[4], lien[7], lien[17]]:
+  r1Out IS [lien[5], lien[6], lien[16]]:
+ 
+  r2In  IS [lien[3], lien[5], lien[9]]:
+  r2Out IS [lien[2], lien[4], lien[8]]:
+  
+  r3In  IS [lien[2], lien[11]]:
+  r3Out IS [lien[3], lien[10]]:
+  
+  r4In  IS [lien[8]]:                  --lien[13],,  lien[15]
+  r4Out IS [lien[9]]:                  -- lien[12],, lien[14]
+  
+  r5In  IS [lien[10]]:                 -- lien[12],, lien[22]
+  r5Out IS [lien[11]]:                  --lien[13],  lien[23]
+  
+  r6In  IS [ lien[16], lien[19]]:         --lien[14],
+  r6Out IS [ lien[17]]:                 --lien[15],, lien[22]
+  
+  
+  
+  SEQ
+    
+    SEQ i=0 FOR 3
+      SEQ j=0 FOR 2
+        SEQ
+          creation[i][j][dest] := (-1)
+          creation[i][j][time] := (-1)
+    
+    --exemple
+    --paquet envoye du terminal 1 a destination du terminal 2 au cycle 20
+    creation[1][0][dest] := 2
+    creation[1][0][time] := 20
+    --paquet envoye du terminal 1 a destination du terminal 0 au cycle 40
+    --creation[1][1][dest] := 0
+    --creation[1][1][time] := 40
+    
+    PAR
+      muxAff(paqScreen,screen)
+      routeur(0,r0In,r0Out,paqScreen[0])
+      routeur(1,r1In,r1Out,paqScreen[1])
+      routeur(2,r2In,r2Out,paqScreen[2])
+      routeur(3,r3In,r3Out,paqScreen[3])
+      routeur(4,r4In,r4Out,paqScreen[4])
+      routeur(5,r5In,r5Out,paqScreen[5])
+      routeur(6,r6In,r6Out,paqScreen[6])
+      terminal(0,lien[20],lien[21],paqScreen[7],creation[0]) 
+      terminal(1,lien[1],lien[0],paqScreen[8],creation[1]) 
+      terminal(2,lien[18],lien[19],paqScreen[9],creation[2]) 
+:

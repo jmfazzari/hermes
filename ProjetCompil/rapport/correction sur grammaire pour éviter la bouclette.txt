@@ -1,0 +1,10 @@
+Suitet_ident_app      ::= VIRGULE t_ident:b
+                          {:parser.isUniqueIdent( b, parser.pline(), parser.pcolumn());
+                          afficher( b);fairePutappareilHash( b,varType);
+                          :}
+                          Suitet_ident_app:c
+                            {::} 
+                             {::}                            {: 
+                                if(c!=""){RESULT = b+","+c;}else{;RESULT = b+"";}
+                            :}
+                        | ;

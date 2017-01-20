@@ -1,0 +1,54 @@
+#USE "course.lib"
+
+PROC source(CHAN OF INT out)
+  WHILE TRUE
+    SEQ
+      SEQ i=0 FOR 256
+        out ! i
+      out ! -1
+:
+
+PROC histoBloc(CHAN OF INT in, out, ecran, VAL INT npixel)
+  INT pixel, valeur:
+  INT nbr:
+  SEQ
+    nbr:=1
+    valeur:=0
+    WHILE TRUE
+      SEQ
+        PAR
+          in ? pixel
+          out ! valeur
+        IF
+          npixel=pixel
+            nbr:=nbr+1
+          pixel=(-1)
+            SEQ
+              ecran ! nbr
+              nbr:=0
+          TRUE
+            valeur := pixel
+:    
+    
+PROC affichage([]CHAN OF INT in, CHAN OF BYTE screen)
+  [256]INT compteur:
+  WHILE TRUE
+    SEQ
+      PAR i=0 FOR 256
+        in[i] ? compteur[i]
+      SEQ i=0 FOR 256
+        SEQ
+          out.number(compteur[i], 3, screen)
+          screen ! '*n'
+:
+
+
+PROC systeme(CHAN OF BYTE keyboard, screen, error)
+  [257]CHAN OF INT c1:
+  [256]CHAN OF INT c2:
+  PAR
+    source(c1[0])
+    PAR i=0 FOR 256
+      histoBloc(c1[i], c1[(i+1)], c2[i], 12)
+    affichage(c2, screen)
+:

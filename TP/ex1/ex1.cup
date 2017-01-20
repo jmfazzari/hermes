@@ -1,0 +1,23 @@
+import java_cup.runtime.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+
+parser code {:
+	public static void main(String args[]) throws Exception {
+		new parser(new Yylex(new InputStreamReader(System.in))).parse();
+	}
+:}
+
+action code {:
+	int nb = 0;
+:}
+
+terminal Integer ENTIER;
+non terminal expr, list_nb;
+
+expr	::= {: System.out.println("debut de l'analyse\n") ; :} list_nb {: System.out.println("\nfin de l'analyse : entiers reconnus :"+nb) ; :}
+	    | {: System.out.println("vide") ; :};
+list_nb	::= ENTIER:n {: nb++; :} list_nb
+	    | ENTIER:n {: nb++; :};
+

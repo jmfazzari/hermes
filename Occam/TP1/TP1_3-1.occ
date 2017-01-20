@@ -1,0 +1,37 @@
+PROC source(CHAN OF INT out)
+  VAL []INT image IS [4,10,9,0,1,56,17,20]:
+  WHILE TRUE
+    SEQ i=0 FOR SIZE image
+      out ! image[i]
+:
+
+PROC seuillage(CHAN OF INT in, CHAN OF BOOL out, VAL INT seuil)
+  INT valPixel:
+  WHILE TRUE
+    SEQ
+      in ? valPixel
+      out ! valPixel>seuil
+:
+
+PROC affichage(CHAN OF BOOL in, CHAN OF BYTE out)
+  BOOL valeur:
+  BYTE retour:
+  WHILE TRUE
+    SEQ
+      in ? valeur
+      IF
+        valeur
+          retour:='1'
+        TRUE
+          retour:='0'
+      out ! retour
+:
+
+PROC systeme(CHAN OF BYTE keyboard, screen, error)
+  CHAN OF INT c1:
+  CHAN OF BOOL c3:
+  PAR
+    source(c1)
+    seuillage(c1,c3,18)
+    affichage(c3, screen)
+:

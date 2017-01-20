@@ -1,0 +1,25 @@
+l'action eteindre n'est pas accecible pour volet a la ligne 45 et colonne 3
+l'action allumer n'est pas accecible pour volet a la ligne 46 et colonne 3
+l'action allumer n'est pas accecible pour volet a la ligne 46 et colonne 48
+l'action allumer n'est pas accecible pour volet a la ligne 48 et colonne 2
+l'action allumer n'est pas accecible pour volet a la ligne 53 et colonne 3
+l'action eteindre n'est pas accecible pour volet a la ligne 54 et colonne 2
+appareil1.getNomAppareil()+" allum�e "
+appareil1.getNomAppareil()+" �teinte "
+l'action allumer n'est pas accecible pour volet a la ligne 60 et colonne 3
+l'action eteindre n'est pas accecible pour volet a la ligne 61 et colonne 2
+appareil1.getNomAppareil()+" allum�e "
+appareil.getNomAppareil()+" �teinte "
+l'action allumer n'est pas accecible pour volet a la ligne 67 et colonne 3
+l'action eteindre n'est pas accecible pour volet a la ligne 68 et colonne 2
+l'action eteindre n'est pas accecible pour volet a la ligne 73 et colonne 3
+l'action allumer n'est pas accecible pour volet a la ligne 76 et colonne 3
+l'action allumer n'est pas accecible pour volet a la ligne 77 et colonne 3
+l'action allumer n'est pas accecible pour volet a la ligne 78 et colonne 48
+l'action allumer n'est pas accecible pour volet a la ligne 84 et colonne 3
+l'action eteindre n'est pas accecible pour volet a la ligne 85 et colonne 2
+l'action allumer n'est pas accecible pour volet a la ligne 89 et colonne 3
+" allum�e "
+l'action eteindre n'est pas accecible pour volet a la ligne 91 et colonne 2
+l'action eteindre n'est pas accecible pour volet a la ligne 94 et colonne 38
+"Attention : la fenetre "+appareil.getNomAppareil()+" est ouverte !"

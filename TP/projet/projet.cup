@@ -1,0 +1,74 @@
+// Specification jCup
+import java_cup.runtime.*;
+import java.io.InputStreamReader;
+import java.util.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException; 
+
+parser code {:
+    public static void main(String args[]) throws Exception {
+        new parser(new Yylex(new InputStreamReader(System.in))).parse();
+    }	
+:}
+
+action code {:
+    public String Tlivre[];
+    int nbLivre=0;
+:}
+
+
+terminal ACOLOUV, ACOLFERM, TITRE, AUTEURS, TYPE, CRITIQUE, CHAINE;
+non terminal axiomeprime, axiome, script, livre, champs;
+
+axiomeprime ::= {:
+                    File f = new File("projet.htm");//0
+                    FileWriter fw = new FileWriter(f, true);
+                    
+                    fw.write("<!DOCTYPE html>\n");
+                    fw.write("<html>\n");
+                    fw.write("\t<head>\n");
+                    fw.write("\t\t<title>Ma bibliothèque</title>\n");
+                    fw.write("\t</head>\n");
+                    fw.write("\t<body>\n");
+                    fw.write("\t\t<p>J'ai une chouette bibliothèque !</p>\n");
+                    fw.write("\t\t<table border=1 cellspacing=1 cellpadding=5>\n\t\t\t<tr>\n");
+                    fw.write("\t\t\t\t<td><b>Titre</b></td>\n");
+                    fw.write("\t\t\t\t<td><b>Auteur</b></td>\n");
+                    fw.write("\t\t\t\t<td><b>Type</b></td>\n");
+                    fw.write("\t\t\t\t<td><b>Critique</b></td>\n\t\t\t</tr>\n");
+                    fw.close();
+                 :}
+                axiome {: 
+                    File f = new File("projet.htm");//0
+                    FileWriter fw = new FileWriter(f, true);
+                    fw.write("\t\t</table>\n");
+                    fw.write("\t\t<p>Ma bibliothèque contient "+nbLivre+" livres, je suis bien content !</p>\n");
+                    fw.write("\t</body>\n");
+                    fw.write("</html>\n");
+                    fw.close();
+                 :};
+axiome  ::= script |;
+script  ::= {: Tlivre=new String[4];:}
+            ACOLOUV livre ACOLFERM  {:
+                                        nbLivre++;
+                                        File f = new File("projet.htm");//2
+                                        FileWriter fw = new FileWriter(f, true);
+                                        fw.write("\t\t\t<tr>\n");
+                                        for(int j=0;j<4;j++){
+                                            fw.write("\t\t\t\t<td>"+Tlivre[j]+"</td>\n");
+                                        }
+                                        fw.write("\t\t\t</tr>\n");
+                                        fw.close();
+                                    :}
+            axiome;
+livre   ::= champs livre
+          | axiome ;
+champs  ::= TITRE CHAINE:a {: Tlivre[0]=(String)a; :}
+          | AUTEURS CHAINE:a {:Tlivre[1]=(String)a; :}
+          | TYPE CHAINE:a {: Tlivre[2]=(String)a; :}
+          | CRITIQUE CHAINE:a {: Tlivre[3]=(String)a; :};
+
+
+
